@@ -89,6 +89,18 @@ defmodule Wallaby.Session do
     Map.update(screenshotable, :screenshots, [], &(&1 ++ [path]))
   end
 
+
+  def take_screenshot(screenshotable, prefix) do
+    image_data =
+      screenshotable
+      |> Driver.take_screenshot
+
+    path = path_for_screenshot(prefix)
+    File.write! path, image_data
+
+    Map.update(screenshotable, :screenshots, [], &(&1 ++ [path]))
+  end
+
   @doc """
   Sets the size of the sessions window.
   """
@@ -188,6 +200,14 @@ defmodule Wallaby.Session do
 
     File.mkdir_p!(screenshot_dir)
     "#{screenshot_dir}/#{year}-#{month}-#{day}-#{hour}-#{minutes}-#{seconds}.png"
+  end
+
+  defp path_for_screenshot(prefix) do
+    {hour, minutes, seconds} = :erlang.time()
+    {year, month, day} = :erlang.date()
+
+    File.mkdir_p!(screenshot_dir)
+    "#{screenshot_dir}/#{prefix}-#{year}-#{month}-#{day}-#{hour}-#{minutes}-#{seconds}.png"
   end
 
   defp screenshot_dir do
